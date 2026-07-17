@@ -33,11 +33,11 @@ jobs:
     environment: gitlab
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
       - name: Clone the code
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }} # head SHA if PR, else fallback to push SHA
       - name: Setup Go
@@ -52,7 +52,7 @@ jobs:
           echo "go-mod=$(go env GOMODCACHE)" >> "$GITHUB_OUTPUT"
       - name: Cache builds
         # https://github.com/mvdan/github-actions-golang#how-do-i-set-up-caching-between-builds
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 #v4.0.2
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
         with:
           path: |
             ${{ steps.go-cache-paths.outputs.go-build }}
@@ -66,7 +66,7 @@ jobs:
             go mod download
 
       - name: Run GitLab tokenless E2E
-        uses: nick-invision/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
+        uses: nick-invision/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
         if: github.event_name == 'pull_request'
         with:
           max_attempts: 3
@@ -75,7 +75,7 @@ jobs:
           command: make e2e-gitlab
 
       - name: Run GitLab PAT E2E  # skip if auth token is not available
-        uses: nick-invision/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
+        uses: nick-invision/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
         if: ${{ github.event_name == 'push' && github.actor != 'dependabot[bot]' }}
         env:
           GITLAB_AUTH_TOKEN: ${{ secrets.GITLAB_TOKEN }}
@@ -86,7 +86,7 @@ jobs:
           command: make e2e-gitlab-token
 
       - name: codecov
-        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # 3.1.6
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # 7.0.0
         with:
          files: "*e2e-coverage.out"
          verbose: true
